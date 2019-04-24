@@ -17,9 +17,9 @@ export class Dao<T extends object> {
    * @param alias An optional alias for the entity, used when filtering.
    */
   constructor(
-    private dataContext: DataContext,
-    private Entity: EntityType<T>,
-    private alias?: string) {
+    protected dataContext: DataContext,
+    protected Entity: EntityType<T>,
+    protected alias?: string) {
   }
 
   /**
