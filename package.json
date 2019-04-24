@@ -1,0 +1,31 @@
+{
+  "name": "formn-nestjs-utils",
+  "version": "0.1.0",
+  "description": "Utility classes to bridge the gap between Formn and NestJS.",
+  "author": "Ben Botto",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "dependencies": {
+    "@nestjs/common": "6.x.x",
+    "@nestjs/core": "6.x.x",
+    "@nestjs/platform-express": "6.x.x",
+    "@types/node": "11.x.x",
+    "bsy-error": "2.x.x",
+    "bsy-validation": "2.x.x",
+    "formn": "5.x.x",
+    "reflect-metadata": "0.x.x",
+    "rxjs": "6.x.x",
+    "typescript": "3.x.x"
+  },
+  "devDependencies": {
+    "nodemon": "1.x.x",
+    "ts-node": "8.x.x",
+    "tsconfig-paths": "3.x.x"
+  }
+}
