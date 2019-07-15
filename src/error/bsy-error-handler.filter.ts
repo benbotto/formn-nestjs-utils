@@ -3,7 +3,10 @@ import {
 }
 from '@nestjs/common';
 
-import { DetailedError, ValidationError, NotFoundError } from 'bsy-error';
+import {
+  DetailedError, ValidationError, NotFoundError, ForbiddenError,
+  UnauthorizedError
+} from 'bsy-error';
 
 @Catch()
 /**
@@ -81,6 +84,12 @@ export class BsyErrorHandlerFilter implements ExceptionFilter {
 
        case HttpStatus.NOT_FOUND:
          return new NotFoundError(httpErr.message.message);
+
+       case HttpStatus.FORBIDDEN:
+         return new ForbiddenError(httpErr.message.message);
+
+       case HttpStatus.UNAUTHORIZED:
+         return new UnauthorizedError(httpErr.message.message);
 
        default:
          return new DetailedError(httpErr.message.message, 'UNKNOWN_HTTP_ERROR');
