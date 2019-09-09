@@ -1,10 +1,9 @@
-import { PipeTransform, Injectable, ArgumentMetadata } from '@nestjs/common';
+import { PipeTransform, ArgumentMetadata } from '@nestjs/common';
 
 import { ModelTransformer, EntityType } from 'formn';
 
 import { ValidationError } from 'bsy-error';
 
-@Injectable()
 export class ModelArrayTransformerPipe<T> implements PipeTransform<T[]> {
   constructor(private entityType: EntityType<T>) {
   }
