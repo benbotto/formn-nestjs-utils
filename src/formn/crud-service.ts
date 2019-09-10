@@ -1,4 +1,4 @@
-import { ParameterType, ParameterizedCondition } from 'formn';
+import { ParameterType, ParameterizedCondition, MutateResultType } from 'formn';
 
 import { Dao } from './dao';
 
@@ -68,4 +68,26 @@ export class CRUDService<T extends object> {
   deleteById(id: number | string | Date): Promise<T> {
     return this.dao.deleteById(id);
   }
+
+  /**
+   * Delete from a table using condition and parameter objects.
+   * @param cond An condition object that can be transpiled into a SQL where
+   * clause.
+   * @param parms Parameter replacements for the condition.
+   */
+  delete(cond?: object, params?: ParameterType): Promise<MutateResultType>;
+
+  /**
+   * Delete from a table using a ParameterizedCondition instance.
+   * @param cond A ParameterizedCondition object built with a ConditionBuilder.
+   */
+  delete(cond: ParameterizedCondition): Promise<MutateResultType>;
+
+  /**
+   * Delete from a table with optional filters.
+   */
+  delete(cond: object | ParameterizedCondition, params?: ParameterType): Promise<MutateResultType> {
+    return this.dao.delete(cond, params);
+  }
 }
+
