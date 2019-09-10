@@ -1,7 +1,7 @@
 import {
-  DataContext, ParameterType, ParameterizedCondition, Select,
-  EntityType, FromAdapter, InsertModelValidator, metaFactory,
-  ConditionBuilder, DeleteModelValidator, UpdateModelValidator
+  DataContext, ParameterType, ParameterizedCondition, Select, EntityType,
+  FromAdapter, InsertModelValidator, metaFactory, ConditionBuilder,
+  DeleteModelValidator, UpdateModelValidator, MutateResultType, Delete
 } from 'formn';
 
 import { NotFoundError, DuplicateError } from 'bsy-error';
@@ -153,6 +153,40 @@ export class Dao<T extends object> {
 
       throw err;
     }
+  }
+
+  /**
+   * Delete from a table using condition and parameter objects.
+   * @param cond An condition object that can be transpiled into a SQL where
+   * clause.
+   * @param parms Parameter replacements for the condition.
+   */
+  delete(cond?: object, params?: ParameterType): Promise<MutateResultType>;
+
+  /**
+   * Delete from a table using a ParameterizedCondition instance.
+   * @param cond A ParameterizedCondition object built with a ConditionBuilder.
+   */
+  delete(cond: ParameterizedCondition): Promise<MutateResultType>;
+
+  /**
+   * Delete from a table with optional filters.
+   */
+  delete(cond: object | ParameterizedCondition, params?: ParameterType): Promise<MutateResultType> {
+    if (cond instanceof ParameterizedCondition) {
+      params = cond.getParams();
+      cond   = cond.getCond();
+    }
+
+    const query: FromAdapter<T> = this.dataContext
+      .from(this.Entity, this.alias);
+
+    if (cond && Object.keys(cond).length)
+      query.where(cond, params);
+
+    const del: Delete = query.delete();
+
+    return del.execute();
   }
 }
 
