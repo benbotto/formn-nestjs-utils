@@ -27,12 +27,24 @@ export class Dao<T extends object> {
    * @param model The model to insert.  If available in the response, model
    * will be updated with its inserted ID.
    */
-  create(model: T): Promise<T> {
-    return new InsertModelValidator()
-      .validate(model, this.Entity)
-      .then(() => this.dataContext
+  async create(model: T): Promise<T> {
+    await new InsertModelValidator()
+      .validate(model, this.Entity);
+
+    try {
+      return await this.dataContext
         .insert(this.Entity, model)
-        .execute());
+        .execute();
+    }
+    catch (err) {
+      if (err.message.startsWith('Cannot add or update a child row: a foreign key constraint fails')) {
+        const table = err.message.replace(/^.*REFERENCES `(\w+)`.*$/, '$1');
+
+        throw new NotFoundError(`Failed to create "${this.Entity.name}."  Invalid reference to "${table}."`);
+      }
+
+      throw err;
+    }
   }
 
   /**
@@ -118,8 +130,14 @@ export class Dao<T extends object> {
         .execute();
     }
     catch (err) {
-      if (err.message && err.message === 'Update operation did not affect any rows.')
+      if (err.message && err.message === 'Update operation did not affect any rows.') {
         throw new NotFoundError(`"${this.Entity.name}" not found.`);
+      }
+      else if (err.message.startsWith('Cannot add or update a child row: a foreign key constraint fails')) {
+        const table = err.message.replace(/^.*REFERENCES `(\w+)`.*$/, '$1');
+
+        throw new NotFoundError(`Failed to update "${this.Entity.name}."  Invalid reference to "${table}."`);
+      }
 
       throw err;
     }
