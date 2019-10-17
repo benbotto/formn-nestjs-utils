@@ -25,7 +25,7 @@ export class SearchService<T extends object> {
    * clause.
    * @param parms Parameter replacements for the condition.
    */
-  retrieve(offset: number, rowCount: number,
+  retrieve(offset: number = 0, rowCount: number = 10,
     cond?: object, params: ParameterType = {}): Promise<SearchResult<T>> {
 
     cond = this.mapCondition(cond, params);
