@@ -10,6 +10,7 @@ export * from './formn/parse-condition.pipe';
 export * from './formn/search/formn-condition-validator';
 export * from './formn/search/parameter-type-validator';
 export * from './formn/search/search-query';
+export * from './formn/search/parse-search-query.pipe';
 
 export * from './error/bsy-error-handler.filter';
 
