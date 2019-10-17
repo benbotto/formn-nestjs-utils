@@ -5,13 +5,12 @@ import { ConditionLexer, ConditionParser } from 'formn';
 import { ValidationError } from 'bsy-error';
 
 @Injectable()
-export class ParseConditionPipe implements PipeTransform<any> {
+export class ParseConditionPipe implements PipeTransform<string, object> {
   /**
    * Transform a string value to an object, but lex and parse it as a Formn
    * condition.
    */
   transform(value: string, meta: ArgumentMetadata): object {
-    // The transformer only transforms single Formn entities.
     if (typeof value !== 'string')
       throw new ValidationError(`Invalid value type ("${meta.data}" must be a string).`, meta.type);
 
