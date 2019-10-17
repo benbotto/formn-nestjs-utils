@@ -12,6 +12,7 @@ export * from './formn/search/parameter-type-validator';
 export * from './formn/search/search-query';
 export * from './formn/search/parse-search-query.pipe';
 export * from './formn/search/search-result';
+export * from './formn/search/search-dao';
 
 export * from './error/bsy-error-handler.filter';
 
