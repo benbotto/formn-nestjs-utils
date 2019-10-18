@@ -1,4 +1,7 @@
-import { DataContext, EntityType, ParameterType, ParameterizedCondition } from 'formn';
+import {
+  DataContext, EntityType, ParameterType, ParameterizedCondition, OrderByType,
+  metaFactory
+} from 'formn';
 
 import { SearchResult } from './search-result';
 
@@ -12,7 +15,7 @@ export class SearchDao<T extends object> {
   constructor(
     protected dataContext: DataContext,
     protected Entity: EntityType<T>,
-    protected alias?: string) {
+    protected alias: string) {
   }
 
   /**
@@ -20,31 +23,35 @@ export class SearchDao<T extends object> {
    * metadata about the resources.
    * @param offset Start row of the result set.
    * @param rowCount Number of rows to return.
-   * @param cond Either a condition object or a ParameterizedCondition.
-   * clause.
-   * @param parms Parameter replacements for the condition.
+   * @param cond A ParameterizedCondition (search filters).
+   * @param order How the results should be ordered.  If not provided, then
+   * the result shall be ordered using the primary key column (ascending).
    */
   retrieve(offset: number, rowCount: number,
-    cond?: object, params?: ParameterType): Promise<SearchResult<T>>;
+    cond?: ParameterizedCondition,
+    order?: OrderByType[]): Promise<SearchResult<T>> {
 
-  retrieve(offset: number, rowCount: number,
-    cond: ParameterizedCondition): Promise<SearchResult<T>>;
+    // Order defaults to pk(s) ascending.
+    if (!order || !order.length) {
+      const pks = metaFactory
+        .getColumnStore()
+        .getPrimaryKey(this.Entity);
 
-  retrieve(offset: number, rowCount: number,
-    cond?: object | ParameterizedCondition,
-    params: ParameterType = {}): Promise<SearchResult<T>> {
-
-    if (cond instanceof ParameterizedCondition) {
-      params = cond.getParams();
-      cond   = cond.getCond();
+      order = pks
+        .map(pk => {
+          return {
+            property: `${this.alias}.${pk.mapTo}`,
+            dir: 'ASC'
+          } as OrderByType;
+        });
     }
 
     return this.dataContext.beginTransaction(async () => {
       const query = this.dataContext
         .from<T>(this.Entity, this.alias);
 
-      if (cond && Object.keys(cond).length)
-        query.where(cond, params);
+      if (cond)
+        query.where(cond)
 
       // Count of entities matching the filter.
       const qCount = query
@@ -54,6 +61,7 @@ export class SearchDao<T extends object> {
       // List of entities.
       const qEntities = query
         .select()
+        .orderBy(...order)
         .limit(offset, rowCount)
         .execute();
 
@@ -68,6 +76,7 @@ export class SearchDao<T extends object> {
       result.rowCount = entities.length;
       result.offset   = offset;
       result.entities = entities;
+      result.order    = order;
 
       return result;
     });
