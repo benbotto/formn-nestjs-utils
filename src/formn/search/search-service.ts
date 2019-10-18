@@ -1,4 +1,7 @@
-import { ParameterType, ColumnLookup, ConditionMapper, ParameterizedCondition } from 'formn';
+import {
+  ParameterType, ColumnLookup, ConditionMapper, ParameterizedCondition,
+  OrderByType
+} from 'formn';
 
 import { ValidationError } from 'bsy-error';
 
@@ -24,14 +27,18 @@ export class SearchService<T extends object> {
    * @param cond An condition object condition that can be transpiled into a
    * SQL where clause.
    * @param parms Parameter replacements for the condition.
+   * @param order How the results should be ordered.  If not provided, then
+   * the result shall be ordered using the primary key column (ascending).
    */
   retrieve(offset: number = 0, rowCount: number = 10,
-    cond?: object, params?: ParameterType): Promise<SearchResult<T>> {
+    cond?: object, params?: ParameterType,
+    order?: OrderByType[]): Promise<SearchResult<T>> {
 
-    cond = this.mapCondition(cond, params);
+    cond  = this.mapCondition(cond, params);
+    order = this.mapOrder(order);
 
     return this.dao
-      .retrieve(offset, rowCount, cond);
+      .retrieve(offset, rowCount, cond as ParameterizedCondition, order);
   }
 
   /**
@@ -57,6 +64,26 @@ export class SearchService<T extends object> {
     }
     catch (err) {
       throw new ValidationError(err.message, 'cond');
+    }
+  }
+
+  /**
+   * Map the properties of the order object to columns.
+   * @param order An array of OrderByType.
+   */
+  protected mapOrder(orders: OrderByType[] = []): OrderByType[] {
+    try {
+      return orders
+        .map(order => {
+          return {
+            property: this.columnLookup
+              .getColumn(order.property),
+            dir: order.dir,
+          } as OrderByType;
+        });
+    }
+    catch (err) {
+      throw new ValidationError(err.message, 'order');
     }
   }
 }
