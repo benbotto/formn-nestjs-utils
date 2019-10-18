@@ -52,7 +52,7 @@
   dependencies:
     moment "*"
 
-"@types/mysql2@types/mysql2":
+"@types/mysql2@github:types/mysql2":
   version "1.0.0"
   resolved "https://codeload.github.com/types/mysql2/tar.gz/217efd4ccf9eccc0797522aa745d8a9e264f6a75"
   dependencies:
@@ -549,8 +549,8 @@ follow-redirects@1.5.10:
     debug "=3.1.0"
 
 formn@5.x.x:
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/formn/-/formn-5.12.1.tgz#14b6a0b21296fc57816ffb5ebaa8c1ab2df0e2cb"
+  version "5.12.2"
+  resolved "https://registry.yarnpkg.com/formn/-/formn-5.12.2.tgz#c19ec4036e800329bc8f38b66d11caf7d5b1b92f"
   dependencies:
     "@types/mysql2" types/mysql2
     "@types/node" "10.x.x"
