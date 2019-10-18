@@ -1,4 +1,4 @@
-import { DataContext, EntityType, ParameterType } from 'formn';
+import { DataContext, EntityType, ParameterType, ParameterizedCondition } from 'formn';
 
 import { SearchResult } from './search-result';
 
@@ -16,16 +16,28 @@ export class SearchDao<T extends object> {
   }
 
   /**
-   * Retrieve SearchResult record which has an array of Entity and some
+   * Retrieve a SearchResult record which has an array of Entity and some
    * metadata about the resources.
    * @param offset Start row of the result set.
    * @param rowCount Number of rows to return.
-   * @param cond An condition object that can be transpiled into a SQL where
+   * @param cond Either a condition object or a ParameterizedCondition.
    * clause.
    * @param parms Parameter replacements for the condition.
    */
   retrieve(offset: number, rowCount: number,
-    cond?: object, params: ParameterType = {}): Promise<SearchResult<T>> {
+    cond?: object, params?: ParameterType): Promise<SearchResult<T>>;
+
+  retrieve(offset: number, rowCount: number,
+    cond: ParameterizedCondition): Promise<SearchResult<T>>;
+
+  retrieve(offset: number, rowCount: number,
+    cond?: object | ParameterizedCondition,
+    params: ParameterType = {}): Promise<SearchResult<T>> {
+
+    if (cond instanceof ParameterizedCondition) {
+      params = cond.getParams();
+      cond   = cond.getCond();
+    }
 
     return this.dataContext.beginTransaction(async () => {
       const query = this.dataContext
