@@ -28,6 +28,8 @@ export class ParseSearchQueryPipe implements PipeTransform<object, Promise<Searc
       search.cond = JSON.parse((value as any).cond);
     if ((value as any).params !== undefined)
       search.params = JSON.parse((value as any).params);
+    if ((value as any).order !== undefined)
+      search.order = JSON.parse((value as any).order);
     if ((value as any).offset !== undefined)
       search.offset = parseInt((value as any).offset, 10);
     if ((value as any).rowCount !== undefined)

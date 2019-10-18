@@ -19,7 +19,7 @@ export class Dao<T extends object> {
   constructor(
     protected dataContext: DataContext,
     protected Entity: EntityType<T>,
-    protected alias?: string) {
+    protected alias: string) {
   }
 
   /**

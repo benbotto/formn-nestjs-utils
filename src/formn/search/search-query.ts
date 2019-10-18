@@ -1,7 +1,12 @@
-import { Validate, NotNullValidator, IntValidator, JSONObjectValidator } from 'bsy-validation';
+import { OrderByType } from 'formn';
+
+import {
+  Validate, NotNullValidator, IntValidator, JSONObjectValidator, JSONValidator
+} from 'bsy-validation';
 
 import { FormnConditionValidator } from './formn-condition-validator';
 import { ParameterTypeValidator } from './parameter-type-validator';
+import { OrderByTypeValidator } from './order-by-type.validator';
 
 export class SearchQuery {
   @Validate(
@@ -25,4 +30,10 @@ export class SearchQuery {
     new JSONObjectValidator(),
     new ParameterTypeValidator())
   params: object;
+
+  @Validate(
+    new NotNullValidator(),
+    new JSONValidator(),
+    new OrderByTypeValidator())
+  order: OrderByType[];
 }
