@@ -1,4 +1,4 @@
-import { ParameterType, ColumnLookup, ConditionMapper } from 'formn';
+import { ParameterType, ColumnLookup, ConditionMapper, ParameterizedCondition } from 'formn';
 
 import { ValidationError } from 'bsy-error';
 
@@ -21,17 +21,17 @@ export class SearchService<T extends object> {
    * a ColumnLookup instance.
    * @param offset Start row of the result set.
    * @param rowCount Number of rows to return.
-   * @param cond An condition object that can be transpiled into a SQL where
-   * clause.
+   * @param cond An condition object condition that can be transpiled into a
+   * SQL where clause.
    * @param parms Parameter replacements for the condition.
    */
   retrieve(offset: number = 0, rowCount: number = 10,
-    cond?: object, params: ParameterType = {}): Promise<SearchResult<T>> {
+    cond?: object, params?: ParameterType): Promise<SearchResult<T>> {
 
     cond = this.mapCondition(cond, params);
 
     return this.dao
-      .retrieve(offset, rowCount, cond, params);
+      .retrieve(offset, rowCount, cond);
   }
 
   /**
@@ -41,14 +41,19 @@ export class SearchService<T extends object> {
    * @param cond An condition object that can be transpiled into a SQL where
    * clause.
    * @param parms Parameter replacements for the condition.
+   * @return A ParameterizedCondition instance with the columns remapped.
    */
-  protected mapCondition(cond?: object, params: ParameterType = {}): object {
+  protected mapCondition(cond?: object,
+    params: ParameterType = {}): ParameterizedCondition {
+
     if (!cond || !Object.keys(cond).length)
-      return cond;
+      return; // undefined condition (no condition).
 
     try {
-      return new ConditionMapper()
+      cond = new ConditionMapper()
         .map(cond, this.columnLookup, params);
+
+      return ParameterizedCondition.normalize(cond, params);
     }
     catch (err) {
       throw new ValidationError(err.message, 'cond');
