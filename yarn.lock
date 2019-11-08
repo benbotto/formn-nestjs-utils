@@ -63,8 +63,8 @@
   resolved "https://codeload.github.com/types/mysql/tar.gz/da645a82afd66419ed439dddf174648aa68ba1f9"
 
 "@types/node@10.x.x":
-  version "10.14.22"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.14.22.tgz#34bcdf6b6cb5fc0db33d24816ad9d3ece22feea4"
+  version "10.17.4"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.4.tgz#8993a4fe3c4022fda66bf4ea660d615fc5659c6f"
 
 "@types/node@11.x.x":
   version "11.13.7"
@@ -549,8 +549,8 @@ follow-redirects@1.5.10:
     debug "=3.1.0"
 
 formn@5.x.x:
-  version "5.12.2"
-  resolved "https://registry.yarnpkg.com/formn/-/formn-5.12.2.tgz#c19ec4036e800329bc8f38b66d11caf7d5b1b92f"
+  version "5.13.0"
+  resolved "https://registry.yarnpkg.com/formn/-/formn-5.13.0.tgz#22bbb228c6cc9dce5f530b7e331a5321820f0a27"
   dependencies:
     "@types/mysql2" types/mysql2
     "@types/node" "10.x.x"
