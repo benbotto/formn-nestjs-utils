@@ -1,6 +1,6 @@
 import {
   DataContext, EntityType, ParameterType, ParameterizedCondition, OrderByType,
-  metaFactory
+  metaFactory, ColumnMetadata
 } from 'formn';
 
 import { SearchResult } from './search-result';
@@ -40,7 +40,7 @@ export class SearchDao<T extends object> {
       order = pks
         .map(pk => {
           return {
-            property: `${this.alias}.${pk.mapTo}`,
+            property: ColumnMetadata.createFQName(this.alias, pk.mapTo),
             dir: 'ASC'
           } as OrderByType;
         });
