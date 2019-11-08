@@ -1,6 +1,6 @@
 {
   "name": "formn-nestjs-utils",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "Utility classes to bridge the gap between Formn and NestJS.",
   "author": "Ben Botto",
   "license": "MIT",
