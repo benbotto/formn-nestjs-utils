@@ -102,15 +102,15 @@ export class SearchDao<T extends object> {
       const cb = new ConditionBuilder();
       const ids = distinctEnts
         .map(ent => (ent as ParameterType)[uniqueId]);
-      let idCond = cb
+      const idCond = cb
         .in(fqUniqueId, ':search-distinct-ids', ids);
 
-      // The original filter is still needed because it may filter out
-      // child entities.
-      if (cond)
-        idCond = cb.and(idCond, cond);
-
-      // A new condition is used, so getSearchQuery is called again.
+      // A new condition is used, so getSearchQuery is called again.  Note that
+      // the user-supplied condition is not included here.  That condition
+      // could filter out child records (e.g. if a Person has three
+      // PhoneNumbers, a search could match just one PhoneNumber).  Here the
+      // matching records are returned in their entirety (e.g. the Person with
+      // all three PhoneNumbers).
       const entities = await this
         .getSearchQuery()
         .where(idCond)
