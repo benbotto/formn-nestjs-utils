@@ -98,36 +98,46 @@ export class SearchDao<T extends object> {
       const [count, distinctEnts] = await Promise
         .all([qCount, qIDs]);
 
-      // List of entities (pulled by ID).
-      const cb = new ConditionBuilder();
-      const ids = distinctEnts
-        .map(ent => (ent as ParameterType)[uniqueId]);
-      const idCond = cb
-        .in(fqUniqueId, ':search-distinct-ids', ids);
+      // This is the returned SearchResult object.
+      const result = new SearchResult<T>();
 
-      // A new condition is used, so getSearchQuery is called again.  Note that
-      // the user-supplied condition is not included here.  That condition
-      // could filter out child records (e.g. if a Person has three
-      // PhoneNumbers, a search could match just one PhoneNumber).  Here the
-      // matching records are returned in their entirety (e.g. the Person with
-      // all three PhoneNumbers).
-      const entities = await this
-        .getSearchQuery()
-        .where(idCond)
-        .select()
-        .orderBy(...order)
-        .limit(offset, rowCount)
-        .execute();
+      result.count  = count;
+      result.offset = offset;
+      result.order  = order;
 
-      // Search results.  Note that the number of rows returned (rowCount) may
-      // be fewer than the number requested.
-      const result    = new SearchResult<T>();
+      if (count) {
+        // List of entities (pulled by ID).
+        const cb = new ConditionBuilder();
+        const ids = distinctEnts
+          .map(ent => (ent as ParameterType)[uniqueId]);
+        const idCond = cb
+          .in(fqUniqueId, ':search-distinct-ids', ids);
 
-      result.count    = count;
-      result.rowCount = entities.length;
-      result.offset   = offset;
-      result.entities = entities;
-      result.order    = order;
+        // A new condition is used, so getSearchQuery is called again.  Note that
+        // the user-supplied condition is not included here.  That condition
+        // could filter out child records (e.g. if a Person has three
+        // PhoneNumbers, a search could match just one PhoneNumber).  Here the
+        // matching records are returned in their entirety (e.g. the Person with
+        // all three PhoneNumbers).
+        const entities = await this
+          .getSearchQuery()
+          .where(idCond)
+          .select()
+          .orderBy(...order)
+          .limit(offset, rowCount)
+          .execute();
+
+        // Note that rowCount may be smaller than requested.  The user may, for
+        // example, request 5 records but only one may match the search
+        // criteria.
+        result.rowCount = entities.length;
+        result.entities = entities;
+      }
+      else {
+        // The count is 0, so no records match the search.
+        result.rowCount = 0;
+        result.entities = [];
+      }
 
       return result;
     });
