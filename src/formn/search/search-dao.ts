@@ -91,7 +91,6 @@ export class SearchDao<T extends object> {
       // Distinct top-level IDs matching the filter.
       const qIDs = countQuery
         .selectDistinct(fqUniqueId)
-        .orderBy(...order)
         .limit(offset, rowCount)
         .execute();
 
