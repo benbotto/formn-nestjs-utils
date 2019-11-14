@@ -60,6 +60,18 @@ export class SearchDao<T extends object> {
     cond?: ParameterizedCondition,
     order?: OrderByType[]): Promise<SearchResult<T>> {
 
+    /**
+     * TODO: The retrieval of IDs is pretty inefficient because it might pull a
+     * massive number of records.  It might be better to pull chunks (e.g. 100
+     * records at a time) until rowCount is reached.  Further a user-supplied
+     * startAt hint could be supplied (e.g. start at id 5,000 on page 50).
+     *
+     * There might need to be a filter provided on the entity retrieval.  It pulls
+     * all the entities by id in totality, but it could be necessary to filter out
+     * some of the sub-entities (e.g. people with only active phone numbers).  Right
+     * now that's handled by join conditions, but it might not always be possible.
+     */
+
     // Order defaults to pk(s) ascending.
     if (!order || !order.length) {
       const pks = metaFactory
@@ -76,54 +88,53 @@ export class SearchDao<T extends object> {
     }
 
     return this.dataContext.beginTransaction(async () => {
-      const countQuery = this.getSearchQuery();
       const uniqueId   = this.getUniqueIdentifier();
       const fqUniqueId = ColumnMetadata.createFQName(this.alias, uniqueId);
 
+      // These are all the top-level IDs matching the search criteria.  (Formn
+      // will make them distinct.)  A distinct list cannot be pulled and
+      // limited because functional dependence.  The results may need to be
+      // ordered by a column in a joined-in table.  See
+      // https://dev.mysql.com/doc/refman/5.7/en/group-by-handling.html, and
+      // particularly the note about ONLY_FULL_GROUP_BY and nondeterministic
+      // results.
+      const idQuery = this.getSearchQuery();
+
       if (cond)
-        countQuery.where(cond);
+        idQuery.where(cond);
 
-      // Count of top-level entities matching the filter.
-      const qCount = countQuery
-        .countDistinct(fqUniqueId)
+      const distinctEnts = await idQuery
+        .select(fqUniqueId)
+        .orderBy(...order)
         .execute();
-
-      // Distinct top-level IDs matching the filter.
-      const qIDs = countQuery
-        .selectDistinct(fqUniqueId)
-        .limit(offset, rowCount)
-        .execute();
-
-      const [count, distinctEnts] = await Promise
-        .all([qCount, qIDs]);
 
       // This is the returned SearchResult object.
       const result = new SearchResult<T>();
 
-      result.count  = count;
+      result.count  = distinctEnts.length;
       result.offset = offset;
       result.order  = order;
 
-      if (count) {
-        // List of entities (pulled by ID).
-        const cb = new ConditionBuilder();
+      if (result.count && result.count > offset) {
+        // A page of the top-level IDs.
         const ids = distinctEnts
+          .slice(offset, offset + rowCount)
           .map(ent => (ent as ParameterType)[uniqueId]);
+
+        const cb = new ConditionBuilder();
         const idCond = cb
           .in(fqUniqueId, ':search-distinct-ids', ids);
 
-        // A new condition is used, so getSearchQuery is called again.  Note that
-        // the user-supplied condition is not included here.  That condition
-        // could filter out child records (e.g. if a Person has three
-        // PhoneNumbers, a search could match just one PhoneNumber).  Here the
-        // matching records are returned in their entirety (e.g. the Person with
-        // all three PhoneNumbers).
+        // A new condition is used.  Note that the user-supplied condition is
+        // not included here.  That condition could filter out child records
+        // (e.g. if a Person has three PhoneNumbers, a search could match just
+        // one PhoneNumber).  Here the matching records are returned in their
+        // entirety (e.g. the Person with all three PhoneNumbers).
         const entities = await this
           .getSearchQuery()
           .where(idCond)
           .select()
           .orderBy(...order)
-          .limit(offset, rowCount)
           .execute();
 
         // Note that rowCount may be smaller than requested.  The user may, for
