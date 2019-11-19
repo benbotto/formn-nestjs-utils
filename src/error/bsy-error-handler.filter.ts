@@ -92,20 +92,25 @@ export class BsyErrorHandlerFilter implements ExceptionFilter {
       let detailedError;
 
       switch (err.getStatus()) {
-       case HttpStatus.BAD_REQUEST:
-         detailedError = new ValidationError(httpErr.message.message, 'request');
+        case HttpStatus.BAD_REQUEST:
+          detailedError = new ValidationError(httpErr.message.message, 'request');
+          break;
 
-       case HttpStatus.NOT_FOUND:
-         detailedError = new NotFoundError(httpErr.message.message);
+        case HttpStatus.NOT_FOUND:
+          detailedError = new NotFoundError(httpErr.message.message);
+          break;
 
-       case HttpStatus.FORBIDDEN:
-         detailedError = new ForbiddenError(httpErr.message.message);
+        case HttpStatus.FORBIDDEN:
+          detailedError = new ForbiddenError(httpErr.message.message);
+          break;
 
-       case HttpStatus.UNAUTHORIZED:
-         detailedError = new UnauthorizedError(httpErr.message.message);
+        case HttpStatus.UNAUTHORIZED:
+          detailedError = new UnauthorizedError(httpErr.message.message);
+          break;
 
-       default:
-         detailedError = new DetailedError(httpErr.message.message, 'UNKNOWN_HTTP_ERROR');
+        default:
+          detailedError = new DetailedError(httpErr.message.message, 'UNKNOWN_HTTP_ERROR');
+          break;
       }
 
       // Preserve the original stack trace.
