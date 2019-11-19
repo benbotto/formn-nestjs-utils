@@ -8,7 +8,6 @@ import {
   UnauthorizedError
 } from 'bsy-error';
 
-@Catch()
 /**
  * Custom error handler for use with bsy-error and Formn.  Formn uses bsy-error
  * behind the scenes, and it provides a suite of error classes that are
@@ -16,6 +15,7 @@ import {
  * This should be wired up against the app, usually in main.ts
  * app.useGlobalFilters(new BsyErrorHandlerFilter());
  */
+@Catch()
 export class BsyErrorHandlerFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost): void {
     const err: DetailedError = this.normalizeError(exception);
@@ -55,17 +55,29 @@ export class BsyErrorHandlerFilter implements ExceptionFilter {
         break;
 
       default:
-        console.error('Unhandled error occurred.');
-        console.error(err);
-
-        response
-          .status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .json({
-            detail: 'Oops, an error occurred.  The software development team has been notified.',
-            code:   'UNHANDLED_ERROR'
-          });
+        this.onUnhandledError(err, host);
         break;
     }
+  }
+
+  /**
+   * This allows sub-classes to capture unhandled exceptions and handle them in
+   * an application-specific way (e.g. send an email with a stacktrace).  By
+   * default it just logs the error to the terminal.
+   */
+  onUnhandledError(err: DetailedError, host: ArgumentsHost): void {
+    const ctx      = host.switchToHttp();
+    const response = ctx.getResponse();
+
+    console.error('Unhandled error occurred.');
+    console.error(err);
+
+    response
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({
+        detail: 'Oops, an error occurred.  The software development team has been notified.',
+        code:   'UNHANDLED_ERROR'
+      });
   }
 
   /**
@@ -77,28 +89,39 @@ export class BsyErrorHandlerFilter implements ExceptionFilter {
 
     if (err instanceof HttpException) {
       const httpErr = err as HttpException;
+      let detailedError;
 
       switch (err.getStatus()) {
        case HttpStatus.BAD_REQUEST:
-         return new ValidationError(httpErr.message.message, 'request');
+         detailedError = new ValidationError(httpErr.message.message, 'request');
 
        case HttpStatus.NOT_FOUND:
-         return new NotFoundError(httpErr.message.message);
+         detailedError = new NotFoundError(httpErr.message.message);
 
        case HttpStatus.FORBIDDEN:
-         return new ForbiddenError(httpErr.message.message);
+         detailedError = new ForbiddenError(httpErr.message.message);
 
        case HttpStatus.UNAUTHORIZED:
-         return new UnauthorizedError(httpErr.message.message);
+         detailedError = new UnauthorizedError(httpErr.message.message);
 
        default:
-         return new DetailedError(httpErr.message.message, 'UNKNOWN_HTTP_ERROR');
+         detailedError = new DetailedError(httpErr.message.message, 'UNKNOWN_HTTP_ERROR');
       }
+
+      // Preserve the original stack trace.
+      detailedError.stack = err.stack;
+
+      return detailedError;
     }
 
     // Maybe a native Error instance, or something with a message.
-    if (err.message)
-      return new DetailedError(err.message, 'UNHANDLED_ERROR');
+    if (err.message) {
+      const detailedError = new DetailedError(err.message, 'UNHANDLED_ERROR');
+
+      detailedError.stack = err.stack;
+
+      return detailedError;
+    }
 
     // Absolute failure.  Something other than an Error was thrown.
     console.error('Failed to normalize error');
@@ -107,4 +130,3 @@ export class BsyErrorHandlerFilter implements ExceptionFilter {
     return new DetailedError('Unknown error.', 'UNKNOWN_ERROR');
   }
 }
-
