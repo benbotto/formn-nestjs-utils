@@ -54,6 +54,12 @@ export class BsyErrorHandlerFilter implements ExceptionFilter {
           .json(err);
         break;
 
+      case 'PAYMENT_REQUIRED_ERROR':
+        response
+          .status(HttpStatus.PAYMENT_REQUIRED)
+          .json(err);
+        break;
+
       default:
         this.onUnhandledError(err, host);
         break;
