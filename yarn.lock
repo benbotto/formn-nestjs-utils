@@ -162,7 +162,12 @@ braces@~3.0.2:
   dependencies:
     fill-range "^7.0.1"
 
-bsy-error@2.x.x, bsy-error@~2.0.0:
+bsy-error@2.x.x:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/bsy-error/-/bsy-error-2.1.1.tgz#282272e5a9d3f77aa047ef1869c36b48a64f1a99"
+  integrity sha512-BmoftXwxpT/EPaWBYFM+tc0c1hgVJ4uvYjwWjZbDG9tpj8mYwRVfN3+lpBC0kNFWsjnY4D/Ain0s9ulLB7Vyhg==
+
+bsy-error@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/bsy-error/-/bsy-error-2.0.0.tgz#193207e26734981db6dcc49316978bc87a40bce8"
 
