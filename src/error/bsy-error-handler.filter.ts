@@ -99,23 +99,23 @@ export class BsyErrorHandlerFilter implements ExceptionFilter {
 
       switch (err.getStatus()) {
         case HttpStatus.BAD_REQUEST:
-          detailedError = new ValidationError(httpErr.message.message, 'request');
+          detailedError = new ValidationError(httpErr.message, 'request');
           break;
 
         case HttpStatus.NOT_FOUND:
-          detailedError = new NotFoundError(httpErr.message.message);
+          detailedError = new NotFoundError(httpErr.message);
           break;
 
         case HttpStatus.FORBIDDEN:
-          detailedError = new ForbiddenError(httpErr.message.message);
+          detailedError = new ForbiddenError(httpErr.message);
           break;
 
         case HttpStatus.UNAUTHORIZED:
-          detailedError = new UnauthorizedError(httpErr.message.message);
+          detailedError = new UnauthorizedError(httpErr.message);
           break;
 
         default:
-          detailedError = new DetailedError(httpErr.message.message, 'UNKNOWN_HTTP_ERROR');
+          detailedError = new DetailedError(httpErr.message, 'UNKNOWN_HTTP_ERROR');
           break;
       }
 
