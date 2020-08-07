@@ -1,6 +1,6 @@
 {
   "name": "formn-nestjs-utils",
-  "version": "2.8.0",
+  "version": "3.0.0",
   "description": "Utility classes to bridge the gap between Formn and NestJS.",
   "author": "Ben Botto",
   "license": "MIT",
@@ -14,9 +14,9 @@
     "watch:test": "chokidar --initial \"src/**/*.ts\" -c \"npm run test\""
   },
   "dependencies": {
-    "@nestjs/common": "6.x.x",
-    "@nestjs/core": "6.x.x",
-    "@nestjs/platform-express": "6.x.x",
+    "@nestjs/common": "7.x.x",
+    "@nestjs/core": "7.x.x",
+    "@nestjs/platform-express": "7.x.x",
     "@types/node": "11.x.x",
     "bsy-error": "2.x.x",
     "bsy-validation": "2.x.x",
